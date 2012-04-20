@@ -40,7 +40,7 @@ function compileT(time,expr) {
 		return compileT(time,expr.left).concat(compileT(time,expr.right));
 	}
 }
-										var compile = function (musexpr) {
+var compile = function (musexpr) {
 	return compileT(0,musexpr);
 };
 var melody_mus = 
