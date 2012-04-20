@@ -3,16 +3,12 @@ var endTime = function (time, expr) {
 	if(expr.tag==='rest') return time+expr.duration;
 	if(expr.tag==='seq') return endTime(endTime(time,expr.left),expr.right);
 	if(expr.tag==='par') return Math.max(endTime(time,expr.left),endTime(time,expr.right));
-	if(expr.tag==='repeat') return expr.count*endTime(expr.section);
+	if(expr.tag==='repeat') return time+expr.count*endTime(0,expr.section);
 };
 
-function charCode(letter) {
-	return letter.charCodeAt(0);
-}
 function convertPitch(pitch) {
-	var letter=pitch.substr(0,1).toUpperCase().charCodeAt(0)-'C'.charCodeAt(0);
+	var letter="CDEFGAB".indexOf(pitch.substr(0,1).toUpperCase(),0);
 	var octave=pitch.substr(1);
-	if(letter<0) letter+=12;
 	return 12+12*octave+letter;
 }
 function compileT(time,expr) {
@@ -26,7 +22,7 @@ function compileT(time,expr) {
 		return r;
 	}
 	if(expr.tag==='rest') {
-		return [{tag:expr.tag, start:time, duration:expr.duration}];
+		return [];
 	}
 	if(expr.tag==='note') {
 		return [{tag:expr.tag, pitch:convertPitch(expr.pitch),
@@ -44,20 +40,31 @@ var compile = function (musexpr) {
 	return compileT(0,musexpr);
 };
 var melody_mus = 
-{ tag: 'seq',
-left:{ tag: 'seq',
-	left: 
+{ 	
+	tag: 'seq',
+	left:
 		{ tag: 'seq',
-		left: { tag: 'note', pitch: 'a4', dur: 250 },
-		right: { tag: 'note', pitch: 'b4', dur: 250 } },
+		left: 
+			{ tag: 'seq',
+				left: 
+					{ tag: 'seq',
+					left: { tag: 'note', pitch: 'a4', dur: 250 },
+					right: { tag: 'note', pitch: 'b4', dur: 250 } },
+				right:
+					{ tag: 'seq',
+					left: { tag: 'note', pitch: 'c4', dur: 500 },
+					right: { tag: 'note', pitch: 'd4', dur: 500 } }
+			},
+		right:
+			{ tag: 'repeat',
+				section: { tag: 'note', pitch: 'c4', dur: 250 },
+				count: 3 }
+		},
 	right:
 		{ tag: 'seq',
-		left: { tag: 'note', pitch: 'c4', dur: 500 },
-		right: { tag: 'note', pitch: 'd4', dur: 500 } }
-},
-right:{ tag: 'repeat',
-  section: { tag: 'note', pitch: 'c4', dur: 250 },
-    count: 3 }
+		left: { tag: 'rest', duration: 400},
+		right: { tag: 'note', pitch: 'g4', dur: 200 }
+		}
 };
 
 console.log(melody_mus);
