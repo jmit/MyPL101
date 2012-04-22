@@ -1,0 +1,15 @@
+start =
+    atom
+
+validchar
+    = [0-9a-zA-Z_?!+-=@#$%^&*/.]
+
+spaceatom =  [ \t\n]+ first:atom
+       {return first}
+
+atom =  "'" first:atom
+     {return ["quote",first];}
+    / "(" first:atom second:spaceatom+ rest:")"
+        {return [first].concat(second);}
+    / chars:validchar+
+        { return chars.join(""); }
